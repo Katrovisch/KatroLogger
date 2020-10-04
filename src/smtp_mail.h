@@ -6,6 +6,7 @@
 #include <errno.h>
 #include <sys/utsname.h>
 #include <quickmail.h>
+#include <X11/Xlib.h>
 
 void smtp_mail(int argc, char **argv);
 extern char outfile[200];
