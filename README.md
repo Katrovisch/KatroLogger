@@ -56,3 +56,7 @@ katrologger --smtps-url smtp.gmail.com --port 465 --mail-from <address> --mail-r
 ```Shell
 make uninstall
 ```
+
+- **License**
+
+KatroLogger is licensed under the [GNU General Public License v3.0](https://github.com/Katrovisch/KatroLogger/blob/master/LICENSE)
