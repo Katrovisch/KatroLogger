@@ -22,6 +22,7 @@
 Install libquickmail:
 ```Shell
 wget https://ufpr.dl.sourceforge.net/project/libquickmail/libquickmail-0.1.29.tar.xz
+```
 ```Shell
 tar -xvf libquickmail-0.1.29.tar.xz
 ```
